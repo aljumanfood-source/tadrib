@@ -1059,6 +1059,38 @@ const ATT_PTS = 5, ATT_MAX = 25, EXAM_MAX = 75, CUTOFF_H = 12;
 const W = {ws:{}, att:{}, prof:{}, exam:{}};
 const WLS = 'waynak2_ws';
 let DB = null, WS_READY = false, WS_MODE = 'local';
+
+/* ---------- Google Sheets shared attendance ---------- */
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwrkQNeJbdDYiphbItn2e2F3jdiwLIj9JEzqgD2vR7UHjTOni-i7NYwQeYRxrAxO4r32w/exec';
+const sheetOn = () => !!SHEET_URL && (location.protocol==='http:' || location.protocol==='https:') && !/(^|\.)claude\.ai$/.test(location.hostname);
+// push one attendance record to the Sheet (fire-and-forget; local copy already saved)
+function sheetPush(rec){
+  if(!sheetOn()) return;
+  const w = W.ws[rec.w] || {};
+  const body = JSON.stringify({ name: PEOPLE[rec.p]||'', day: rec.d, workshop: rec.w, workshopName: w.n||'', p: rec.p, at: rec.at });
+  try{
+    fetch(SHEET_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'}, body }).catch(()=>{});
+  }catch(e){}
+}
+// pull all attendance rows from the Sheet and merge into W.att, then refresh
+async function sheetPull(){
+  if(!sheetOn()) return;
+  try{
+    const r = await fetch(SHEET_URL, { method:'GET' });
+    const j = await r.json();
+    if(!j || !j.ok || !Array.isArray(j.rows)) return;
+    let changed = false;
+    j.rows.forEach(row => {
+      let p = (row.p!==undefined && row.p!=='') ? parseInt(row.p,10) : PEOPLE.indexOf(String(row.name||'').trim());
+      const wid = row.workshop, d = row.day;
+      if(isNaN(p) || p<0 || !wid || !d) return;
+      const k = aKey(wid, p, d);
+      if(!W.att[k]){ W.att[k] = {w:wid, p, d, at: row.at || row.time || new Date().toISOString()}; changed = true; }
+    });
+    if(changed){ wLocalSave(); if(!$('#layer').innerHTML) render(); }
+  }catch(e){}
+}
+
 const DEFAULT_WS = {
   id: 'wshathrat5',
   n: 'قراءة كتاب شذرات إسلامية الجزء الخامس',
@@ -1147,6 +1179,7 @@ function wLocalSave(){ if(WS_MODE!=='local') return; try{ localStorage.setItem(W
 function wLocalLoad(){ try{ const o = JSON.parse(localStorage.getItem(WLS)||'null'); if(o) for(const k in W) W[k] = o[k]||{}; }catch(e){} }
 async function wPut(col, id, data){
   const prev = W[col][id]; W[col][id] = data;
+  if(col==='att') sheetPush(data);
   if(!DB){ wLocalSave(); return; }
   try{ await DB.collection(col).doc(id).set(data); }
   catch(e){ if(prev===undefined) delete W[col][id]; else W[col][id]=prev;
@@ -1169,7 +1202,9 @@ async function wInit(){
   let tries = 0; while(!(window.claude && typeof window.claude.use==='function') && tries++ < maxTries) await new Promise(r=>setTimeout(r,100));
   let db = null;
   try{ if(window.claude && typeof window.claude.use==='function') db = await window.claude.use('db'); }catch(e){ db = null; }
-  if(!db){ WS_MODE='local'; wLocalLoad(); WS_READY=true; wSeed(); render(); return; }
+  if(!db){ WS_MODE='local'; wLocalLoad(); WS_READY=true; wSeed(); render();
+    if(sheetOn()){ sheetPull(); setInterval(() => { if(SESSION && UI.tab==='inv' && !$('#layer').innerHTML) sheetPull(); }, 20000); }
+    return; }
   DB = db; WS_MODE = 'db'; const seen = new Set();
   const ready = (seeded) => { if(!WS_READY){ WS_READY=true; if(seeded) wSeed(); render(); } };
   ['ws','att','prof','exam'].forEach(col => {
