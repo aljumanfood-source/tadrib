@@ -1136,7 +1136,8 @@ const ldParse = s => { const [y,m,d] = s.split('-').map(Number); return new Date
 const fdl = s => s ? dfmt.format(ldParse(s)) : '—';
 const wkday = new Intl.DateTimeFormat('ar',{weekday:'long'});
 const dg = n => n+' '+(n>=3&&n<=10&&Number.isInteger(+n)?'درجات':'درجة');
-const pastNoon = () => new Date().getHours() >= CUTOFF_H;
+const CUTOFF_ON = false; // اجعلها true لإعادة إغلاق التسجيل الساعة 12 ظهرًا
+const pastNoon = () => CUTOFF_ON && new Date().getHours() >= CUTOFF_H;
 function wDays(w){
   const out = new Set();
   (w.ranges||[]).forEach(r => { if(!r.f) return; const d = ldParse(r.f), e = ldParse(r.t && r.t>=r.f ? r.t : r.f); let g=0;
