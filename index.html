@@ -1055,7 +1055,7 @@ const PEOPLE = [
   'ناصر بن خلفان الحارثي','هلال بن سليمان العامري','هلال بن خلفان الشكيري','يعقوب بن محمد المنجي','يوسف بن سليمان الحارثي',
   'يوسف بن محمد المعمري'
 ];
-const ATT_PTS = 5, ATT_MAX = 25, EXAM_MAX = 75, CUTOFF_H = 12;
+const EXAM_MAX = 75, CUTOFF_H = 12; // attendance carries no marks; the grade is the exam only
 const W = {ws:{}, att:{}, prof:{}, exam:{}};
 const WLS = 'waynak2_ws';
 let DB = null, WS_READY = false, WS_MODE = 'local';
@@ -1176,7 +1176,6 @@ function wPastAtt(){
 const eKey = (wid,p) => wid+'__'+p;
 const hasAtt = (wid,p,d) => !!W.att[aKey(wid,p,d)];
 const attDays = (w,p) => wDays(w).filter(d => hasAtt(w.id,p,d));
-const attScore = (w,p) => Math.min(ATT_MAX, attDays(w,p).length*ATT_PTS);
 const examOf = (w,p) => W.exam[eKey(w.id,p)] || null;
 const lastDay = w => { const d = wDays(w); return d[d.length-1]; };
 const wsToday = () => wList().filter(w => wDays(w).includes(ldate()));
@@ -1328,10 +1327,10 @@ function viewWorkshop(w){
   const days = wDays(w), t = ldate(), isToday = days.includes(t), [c,s] = wStatus(w), qt = qTotal(w), nq = (w.qs||[]).length;
   const cnt = isToday ? PEOPLE.filter((_,p) => hasAtt(w.id,p,t)).length : 0;
   const rows = PEOPLE.map((n,p) => {
-    const ad = attDays(w,p).length, as = attScore(w,p), ex = examOf(w,p), es = ex ? +ex.score : null, pr = W.prof['p'+p] || {};
+    const ad = attDays(w,p).length, ex = examOf(w,p), es = ex ? +ex.score : null, pr = W.prof['p'+p] || {};
     const dots = days.map(d => `<i class="${hasAtt(w.id,p,d)?'on':(d<t || (d===t && pastNoon()))?'off':''}"></i>`).join('');
     return `<tr data-act="ws_row" data-v="${p}"><td>${p+1}</td><td class="nm">${esc(n)}</td><td>${esc(pr.m||'—')}</td>
-      <td><b>${ad}</b> / ${days.length}<span class="dots">${dots}</span></td><td>${as}</td><td>${es==null?'—':es}</td><td><b>${as+(es||0)}</b></td></tr>`;
+      <td><b>${ad}</b> / ${days.length}<span class="dots">${dots}</span></td><td><b>${es==null?'—':es}</b></td></tr>`;
   }).join('');
   return `<h1><bdi>${esc(w.n)}</bdi></h1>
     <div class="row" style="gap:6px;margin-bottom:10px"><span class="chip ${c}">${s}</span><span class="chip gray">${days.length} أيام</span></div>
@@ -1348,8 +1347,7 @@ function viewWorkshop(w){
     <h2 style="font-size:1rem;margin:14px 0 4px">المشاركون (${PEOPLE.length})</h2>
     <p class="small muted" style="margin:0 0 8px">${isToday?`حضور اليوم: <b>${cnt}</b> من ${PEOPLE.length} · ${pastNoon()?'أُغلق التسجيل، ومن لم يسجّل يُعدّ غائبًا.':'يُغلق التسجيل الساعة 12 ظهرًا.'} `:''}اسحب الجدول جانبًا لرؤية الدرجات، واضغط على أي صف لعرض التفاصيل أو التعديل.</p>
     <div class="wtwrap"><table class="wt"><thead>
-      <tr><th rowspan="2">م</th><th rowspan="2" class="nm">الاسم</th><th rowspan="2">اسم المسجد</th><th rowspan="2">أيام الحضور</th><th colspan="3">الدرجة</th></tr>
-      <tr><th>الحضور<small>من 25</small></th><th>الاختبار<small>من 75</small></th><th>المجموع<small>من 100</small></th></tr>
+      <tr><th>م</th><th class="nm">الاسم</th><th>اسم المسجد</th><th>أيام الحضور</th><th>درجة الاختبار<small>من 75</small></th></tr>
     </thead><tbody>${rows}</tbody></table></div>
     <button class="btn bad block" style="margin:6px 0 20px" data-act="ws_del">حذف الورشة</button>`;
 }
@@ -1440,9 +1438,9 @@ function wsRow(w, p){
   sheet(PEOPLE[p], `
     <div class="row" style="gap:8px"><label class="field grow"><span>اسم المسجد</span><input name="m" value="${esc(pr.m||'')}"></label>
       <label class="field grow"><span>رقم الهاتف</span><input name="ph" class="ltr" inputmode="tel" value="${esc(pr.ph||'')}"></label></div>
-    <div class="field"><span>أيام الحضور (${ATT_PTS} درجات لكل يوم)</span>
+    <div class="field"><span>أيام الحضور</span>
       ${days.map(d => { const a = W.att[aKey(w.id,p,d)]; return `<label class="row small dayck"><input type="checkbox" name="d" value="${d}" ${a?'checked':''}>
-        <span class="grow">${wkday.format(ldParse(d))} ${fdl(d)}</span><span class="muted">${a&&a.at?'سجّل '+new Date(a.at).toLocaleTimeString('ar-u-nu-latn',{hour:'numeric',minute:'2-digit'}):(d<t||(d===t&&pastNoon()))?'غائب':''}</span></label>`; }).join('')}</div>
+        <span class="grow">${wkday.format(ldParse(d))} ${fdl(d)}</span><span class="muted">${a?(a.at?'سجّل '+new Date(a.at).toLocaleTimeString('ar-u-nu-latn',{hour:'numeric',minute:'2-digit'}):'حاضر'):(d<t||(d===t&&pastNoon()))?'غائب':''}</span></label>`; }).join('')}</div>
     <label class="field"><span>درجة الاختبار (من 75)${ex&&ex.ans?` · الدرجة التلقائية ${ex.auto}`:''}</span><input name="ex" type="number" min="0" max="75" step="0.5" inputmode="decimal" value="${ex?esc(ex.score):''}" placeholder="لم يُختبر بعد"></label>
     ${ex&&ex.ans?`<p class="small muted" style="margin-top:-6px">أرسل إجاباته ${new Date(ex.at).toLocaleString('ar-u-nu-latn',{dateStyle:'medium',timeStyle:'short'})}. إفراغ الخانة يحذف الاختبار ويتيح إعادته.</p>`:''}`, (d, f) => {
       const jobs = [];
