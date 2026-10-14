@@ -1096,8 +1096,8 @@ const DEFAULT_WS = {
   n: 'قراءة كتاب شذرات إسلامية الجزء الخامس',
   by: 'حمد بن حمود الطوقي',
   poster: BOOK_POSTER,
-  ranges: [{f:'2026-10-01',t:''},{f:'2026-10-08',t:''},{f:'2026-10-15',t:''},{f:'2026-10-22',t:''},{f:'2026-10-29',t:''}],
-  timing: 'كل خميس (١ / ٨ / ١٥ / ٢٢ / ٢٩ أكتوبر ٢٠٢٦)',
+  ranges: [{f:'2026-10-01',t:''},{f:'2026-10-15',t:''},{f:'2026-10-22',t:''},{f:'2026-10-29',t:''}],
+  timing: 'كل خميس (١ / ١٥ / ٢٢ / ٢٩ أكتوبر ٢٠٢٦)',
   place: 'القاعة الأرضية - مبنى إدارة الأوقاف بشمال الشرقية',
   sum: '',
   qs: [],
@@ -1155,6 +1155,16 @@ const PAST_ATT = {
       'هلال بن خلفان الشكيري','يعقوب بن محمد المنجي','يوسف بن محمد المعمري']
   }
 };
+// meetings that were not held: removed from the workshop already saved on each device
+const CANCELLED = { wshathrat5: ['2026-10-08'] };
+function wCancelled(){
+  Object.entries(CANCELLED).forEach(([wid, days]) => {
+    const w = W.ws[wid]; if(!w) return;
+    const ranges = (w.ranges||[]).filter(r => !(days.includes(r.f) && (!r.t || r.t===r.f)));
+    const timing = (w.timing||'').replace(' / ٨ /', ' /');
+    if(ranges.length!==(w.ranges||[]).length || timing!==w.timing) W.ws[wid] = {...w, ranges, timing};
+  });
+}
 function wPastAtt(){
   Object.entries(PAST_ATT).forEach(([wid, byDay]) => Object.entries(byDay).forEach(([d, names]) => names.forEach(n => {
     const p = PEOPLE.indexOf(n);
@@ -1219,7 +1229,7 @@ async function wInit(){
   let tries = 0; while(!(window.claude && typeof window.claude.use==='function') && tries++ < maxTries) await new Promise(r=>setTimeout(r,100));
   let db = null;
   try{ if(window.claude && typeof window.claude.use==='function') db = await window.claude.use('db'); }catch(e){ db = null; }
-  if(!db){ WS_MODE='local'; wLocalLoad(); wPastAtt(); WS_READY=true; wSeed(); render();
+  if(!db){ WS_MODE='local'; wLocalLoad(); wPastAtt(); WS_READY=true; wSeed(); wCancelled(); render();
     if(sheetOn()){ sheetPull(); setInterval(() => { if(SESSION && UI.tab==='inv' && !$('#layer').innerHTML) sheetPull(); }, 20000); }
     return; }
   DB = db; WS_MODE = 'db'; const seen = new Set();
