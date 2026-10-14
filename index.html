@@ -1051,7 +1051,7 @@ const PEOPLE = [
   'حسين بن محمد الحارثي','حمزه بن محمد الحارثي','حمود بن ناصر الحارثي','ربيع بن سالم الرحبي','زاهر بن عامر الراشدي',
   'سالم بن ناصر المسكري','سعود بن عامر الراشدي','سعيد بن جمعه المرهوبي','سلطان بن سالم العويسي','سلطان بن سالم الرحبي',
   'سلطان بن سليمان الإسماعيلي','سليم بن حمد الدويكي','سليمان بن سالم الغيثي','عبدالله بن ناصر الحارثي','عدنان بن سالم العويسي',
-  'علي بن سالم الشبلي','ماجد بن سعيد السيابي','محمد بن جمعه الرحبي','محمد بن ناص المسكري','مسعود بن محمد العيسري',
+  'علي بن سالم الشبلي','ماجد بن سعيد السيابي','محمد بن جمعه الرحبي','محمد بن ناصر المسكري','مسعود بن محمد العيسري',
   'ناصر بن خلفان الحارثي','هلال بن سليمان العامري','هلال بن خلفان الشكيري','يعقوب بن محمد المنجي','يوسف بن سليمان الحارثي',
   'يوسف بن محمد المعمري'
 ];
@@ -1147,6 +1147,22 @@ function wDays(w){
 const wList = () => Object.entries(W.ws).map(([id,w]) => ({id, ...w})).sort((a,b) => (wDays(b)[0]||'').localeCompare(wDays(a)[0]||''));
 const wGet = id => W.ws[id] ? {id, ...W.ws[id]} : null;
 const aKey = (wid,p,d) => wid+'__'+p+'__'+d;
+// attendance recorded by the supervisor outside the app (on paper); merged on every device at load
+const PAST_ATT = {
+  wshathrat5: {
+    '2026-10-01': ['حسين بن علي بني سعد','حمزه بن محمد الحارثي','سالم بن ناصر المسكري','سعيد بن جمعه المرهوبي','سليم بن حمد الدويكي',
+      'سليمان بن سالم الغيثي','ماجد بن سعيد السيابي','محمد بن ناصر المسكري','مسعود بن محمد العيسري','ناصر بن خلفان الحارثي',
+      'هلال بن خلفان الشكيري','يعقوب بن محمد المنجي','يوسف بن محمد المعمري']
+  }
+};
+function wPastAtt(){
+  Object.entries(PAST_ATT).forEach(([wid, byDay]) => Object.entries(byDay).forEach(([d, names]) => names.forEach(n => {
+    const p = PEOPLE.indexOf(n);
+    if(p<0){ console.warn('PAST_ATT: name not in PEOPLE', n); return; }
+    const k = aKey(wid, p, d);
+    if(!W.att[k]) W.att[k] = {w:wid, p, d, at:'', by:'paper'};
+  })));
+}
 const eKey = (wid,p) => wid+'__'+p;
 const hasAtt = (wid,p,d) => !!W.att[aKey(wid,p,d)];
 const attDays = (w,p) => wDays(w).filter(d => hasAtt(w.id,p,d));
@@ -1203,7 +1219,7 @@ async function wInit(){
   let tries = 0; while(!(window.claude && typeof window.claude.use==='function') && tries++ < maxTries) await new Promise(r=>setTimeout(r,100));
   let db = null;
   try{ if(window.claude && typeof window.claude.use==='function') db = await window.claude.use('db'); }catch(e){ db = null; }
-  if(!db){ WS_MODE='local'; wLocalLoad(); WS_READY=true; wSeed(); render();
+  if(!db){ WS_MODE='local'; wLocalLoad(); wPastAtt(); WS_READY=true; wSeed(); render();
     if(sheetOn()){ sheetPull(); setInterval(() => { if(SESSION && UI.tab==='inv' && !$('#layer').innerHTML) sheetPull(); }, 20000); }
     return; }
   DB = db; WS_MODE = 'db'; const seen = new Set();
