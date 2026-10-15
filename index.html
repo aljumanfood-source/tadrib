@@ -1082,7 +1082,9 @@ async function sheetPull(){
     let changed = false;
     j.rows.forEach(row => {
       let p = (row.p!==undefined && row.p!=='') ? parseInt(row.p,10) : PEOPLE.indexOf(String(row.name||'').trim());
-      const wid = row.workshop, d = row.day;
+      // Sheets stores the day as a date (e.g. 2026-10-14T20:00:00Z = 15 Oct in Oman); read it back as the local day
+      const wid = row.workshop, rd = String(row.day||'').trim();
+      const d = rd.includes('T') && !isNaN(new Date(rd)) ? ldate(new Date(rd)) : rd.slice(0,10);
       if(isNaN(p) || p<0 || !wid || !d) return;
       const k = aKey(wid, p, d);
       if(!W.att[k]){ W.att[k] = {w:wid, p, d, at: row.at || row.time || new Date().toISOString()}; changed = true; }
