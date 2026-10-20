@@ -291,7 +291,14 @@ header.top .iconbtn{color:var(--muted)}
 
 /* workshops */
 .wthumb{width:46px;height:46px;border-radius:10px;object-fit:cover;flex:none;border:1px solid var(--line)}
-.wlist{display:flex;flex-direction:column;gap:12px;margin-top:4px}
+.wshead{text-align:center;margin:6px 0 16px}
+.wlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:4px}
+.wlist .wcard{gap:5px;padding:34px 10px 12px}
+.wlist .wcard-poster{width:84px;height:118px}
+.wlist .wcard-t{font-size:.95rem;max-width:none}
+.wlist .wcard-by{font-size:.8rem}
+.wlist .wcard-when{font-size:.78rem}
+.wlist .wcard-chip{top:8px;inset-inline-start:8px;font-size:.72rem}
 .wcard{display:flex;flex-direction:column;align-items:center;text-align:center;gap:7px;width:100%;padding:18px 16px 16px;background:var(--card,#fff);border:1px solid var(--line);border-radius:16px;position:relative;box-shadow:0 6px 18px -14px rgba(16,42,67,.35)}
 .wcard-chip{position:absolute;inset-inline-start:12px;top:12px}
 .wcard-poster{width:104px;height:146px;object-fit:cover;border-radius:12px;border:1px solid var(--line);margin-top:4px}
@@ -1497,8 +1504,7 @@ function viewWorkshops(){
   if(!WS_READY) return `<div class="empty">جارٍ تحميل الورش…</div>`;
   if(UI.wsid){ const w = wGet(UI.wsid); if(w) return viewWorkshop(w); UI.wsid = null; }
   const list = wList();
-  return `<h1>ورشة عمل <span class="muted small">(${list.length})</span></h1>
-    ${WS_MODE==='local'?`<p class="small muted" style="margin-top:0">الورش محفوظة على هذا الجهاز فقط في هذه المعاينة، وتُشارَك بين الأجهزة في التطبيق المنشور.</p>`:''}
+  return `<h1 class="wshead">ورشة عمل</h1>
     ${list.length ? `<div class="wlist">${list.map(w => { const [c,s] = wStatus(w); return `<button class="wcard" data-act="ws_open" data-v="${w.id}">
       <span class="chip ${c} wcard-chip">${s}</span>
       ${w.poster?`<img class="wcard-poster" src="${esc(w.poster)}" alt="">`:`<span class="avatar wcard-avatar">${I.board}</span>`}
