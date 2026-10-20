@@ -530,7 +530,26 @@ const prPts = m => m==='j' || m==='q' ? 5 : m==='f' ? 1 : 0;
 const hijri = new Intl.DateTimeFormat('ar-u-ca-islamic-umalqura-nu-latn',{day:'numeric',month:'long',year:'numeric'});
 const wdayF = new Intl.DateTimeFormat('ar',{weekday:'long'});
 const isoAdd = (iso,n) => { const d=new Date(iso+'T12:00:00'); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); };
-const hijriOf = iso => hijri.format(new Date(isoAdd(iso, S.hAdj ?? -1)+'T12:00:00')).replace(/\s*هـ$/,'');
+// تقويم عُمان (وزارة الأوقاف) هو المرجع: أول يوم من كل شهر هجري. آخر صف هو أول شهر لا نعرف طوله بعد
+const OMAN_HM = [
+  ['2026-10-12','جمادى الأولى',1448], ['2026-11-11','جمادى الآخرة',1448], ['2026-12-11','رجب',1448],
+  ['2027-01-09','شعبان',1448], ['2027-02-08','رمضان',1448], ['2027-03-10','شوال',1448],
+  ['2027-04-08','ذو القعدة',1448], ['2027-05-08','ذو الحجة',1448], ['2027-06-06','محرم',1449]
+];
+const isoDiff = (a,b) => Math.round((new Date(a+'T12:00:00') - new Date(b+'T12:00:00'))/864e5);
+// {d, m, y, len} from the Oman table, or null outside it (len is 29/30, null for the last listed month)
+function omanH(iso){
+  for(let i = OMAN_HM.length-1; i >= 0; i--){
+    const [f, m, y] = OMAN_HM[i]; if(iso < f) continue;
+    const next = OMAN_HM[i+1], d = isoDiff(iso, f) + 1;
+    if(!next && d > 29) return null;
+    return {d, m, y, len: next ? isoDiff(next[0], f) : null};
+  }
+  return null;
+}
+// outside the Oman table fall back to Umm al-Qura (plus the manual adjustment in settings)
+const hijriOf = iso => { const h = omanH(iso); return h ? h.d+' '+h.m+' '+h.y
+  : hijri.format(new Date(isoAdd(iso, S.hAdj ?? 0)+'T12:00:00')).replace(/\s*هـ$/,''); };
 function weekStart(iso){ const d=new Date(iso+'T12:00:00'); return isoAdd(iso, -d.getDay()); } // week runs Sunday to Saturday
 function prWeeks(){
   const J = myJ(); J.pr ||= {};
@@ -1768,7 +1787,7 @@ document.addEventListener('click', e => {
       <p class="small" style="margin-top:0">المستخدم الحالي: <b>${esc(SESSION)}</b></p>
       <button type="button" class="btn bad block" style="margin-bottom:14px" data-act="logout">تسجيل الخروج</button>
       <p class="small muted">هذا نموذج أولي: التعديلات محفوظة على هذا الجهاز فقط، والزبائن المعلَّمون «تجريبي» للتوضيح وليسوا من ملفك.</p>
-      <label class="field"><span>تعديل التاريخ الهجري (بالأيام)</span><select name="hadj">${[-2,-1,0,1,2].map(n=>`<option value="${n}" ${(S.hAdj ?? -1)===n?'selected':''}>${n>0?'+'+n:n}</option>`).join('')}</select></label>
+      <label class="field"><span>تعديل التاريخ الهجري (بالأيام، لما بعد جدول تقويم عُمان فقط)</span><select name="hadj">${[-2,-1,0,1,2].map(n=>`<option value="${n}" ${(S.hAdj ?? 0)===n?'selected':''}>${n>0?'+'+n:n}</option>`).join('')}</select></label>
       <label class="row small" style="margin-bottom:12px"><input type="checkbox" name="imp" ${S.showImp?'checked':''}> إظهار زبائن أودو المستوردين (${S.customers.filter(c=>c.imp).length})</label>
       <label class="row small" style="margin-bottom:12px"><input type="checkbox" name="reset"> إعادة البيانات إلى حالتها الأولى</label>`, d => {
       if(d.reset){ const r=S.role; S=seed(); S.role=r; UI={...UI,cust:null,req:null}; toast('أُعيدت البيانات'); return; }
