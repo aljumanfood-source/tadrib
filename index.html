@@ -208,7 +208,7 @@ header.top .iconbtn{color:var(--muted)}
 .bell{position:relative}
 .bdot{position:absolute;top:0;inset-inline-end:-2px;background:var(--bad);color:#fff;border-radius:999px;font-size:.66rem;min-width:17px;height:17px;display:grid;place-items:center;padding:0 4px;font-weight:700}
 .circles{display:grid;grid-template-columns:1fr 1fr;justify-items:center;gap:18px 12px;margin:18px 0 8px}
-.circles .circ:nth-child(3){grid-column:1 / -1}
+.circles .circ:nth-child(3):last-child{grid-column:1 / -1}
 .circ{position:relative;width:min(150px,40vw);aspect-ratio:1;border-radius:50%;border:0;color:#fff;
   background:radial-gradient(circle at 35% 30%,#10B57C 0%,#029966 55%,#027E54 100%);
   box-shadow:0 12px 24px -12px rgba(2,120,80,.7),inset 0 -4px 10px rgba(0,0,0,.12);
@@ -219,6 +219,37 @@ header.top .iconbtn{color:var(--muted)}
 .cbadge{position:absolute;top:6%;inset-inline-end:6%;background:#fff;color:var(--bad);border-radius:999px;min-width:28px;height:28px;display:grid;place-items:center;font-weight:700;font-size:.9rem;box-shadow:0 2px 6px rgba(0,0,0,.2);padding:0 6px}
 .exitbtn{background:var(--bad-soft);color:var(--bad)}
 .exitbtn svg{width:18px;height:18px}
+.tzhead{text-align:center;padding:6px 8px 4px}
+.tzhead .hj{font-size:1.55rem;font-weight:700;color:#029966;line-height:1.3}
+.tzhead .gd{color:var(--muted);font-size:.9rem;margin-top:2px}
+.tzhead .vs{font-family:"Amiri Quran","Amiri",serif;font-size:1.2rem;margin-top:8px}
+.tzsec{font-size:.92rem;color:var(--muted);font-weight:700;margin:18px 2px 8px}
+.tzcard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:2px 14px}
+.tzrow{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+.tzrow:first-child{border-top:0}
+.tzrow b{display:block;font-size:1rem}
+.tzrow small{display:block;color:var(--muted);font-size:.8rem;margin-top:2px;line-height:1.5}
+.tzrow.done b{color:#029966}
+.tzrow.next{background:var(--ok-soft);margin:0 -14px;padding-inline:14px}
+.tznext{display:inline-block;margin-inline-start:8px;padding:1px 8px;border-radius:99px;background:#029966;color:#fff;font-size:.7rem;vertical-align:2px}
+.tzbtn{flex:none;min-width:98px;border:0;border-radius:99px;padding:9px 14px;background:#029966;color:#fff;font:inherit;font-weight:700;font-size:.92rem;cursor:pointer}
+.tzbtn.go{background:var(--card);color:#029966;box-shadow:inset 0 0 0 1.5px #029966}
+.tzdone{flex:none;width:40px;height:40px;border-radius:50%;border:0;background:#029966;color:#fff;display:grid;place-items:center;cursor:pointer}
+.tzdone svg{width:22px;height:22px}
+.tzpr{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.tzp{border:1px solid var(--line);border-radius:14px;padding:12px 2px;background:var(--card);color:var(--text);display:flex;flex-direction:column;align-items:center;gap:6px;font:inherit;cursor:pointer}
+.tzp b{font-size:.9rem}
+.tzp span{font-size:.7rem;font-weight:700;color:#029966}
+.tzp.done{background:#029966;border-color:#029966;color:#fff}
+.tzp.done span{color:#fff}
+.tzn{flex:none;min-width:44px;text-align:center;font-size:1.5rem;font-weight:700;color:#029966}
+.tzprog{height:8px;border-radius:99px;background:var(--line);overflow:hidden;margin:12px 0 10px}
+.tzprog i{display:block;height:100%;background:#029966;border-radius:99px}
+.dpdots{display:grid;grid-template-columns:repeat(20,1fr);gap:4px;width:100%;background:none;border:0;padding:10px 0 0;cursor:pointer}
+.dpdots i{aspect-ratio:1;border-radius:50%;background:var(--line)}
+.dpdots i.on{background:#029966}
+.dpdots i.miss{background:#f3c7c7}
+.dpdots i.tod{background:transparent;box-shadow:inset 0 0 0 2px #029966}
 .jgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .jcard{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:start;min-height:128px;padding:16px 14px;border-radius:18px;border:0;color:#fff;
   background:radial-gradient(circle at 20% 15%,#10B57C 0%,#029966 55%,#027E54 100%);box-shadow:0 10px 20px -12px rgba(2,120,80,.7)}
@@ -503,9 +534,10 @@ function viewLanding(){
       ${ic}<b>${title}</b>${badge?`<span class="cbadge">${badge}</span>`:''}</button>`;
   return `<h1 style="margin-bottom:4px">أهلًا ${esc(SESSION)}</h1><p class="muted small" style="margin:0 0 10px">إلى أين تريد الذهاب؟</p>
     <div class="circles">
-      ${circ('cust','رحلتي', I.route)}
-      ${circ('inv','ورشة عمل', I.board)}
-      ${HIDE_REQ ? circ('learn','التعلم', I.book) : circ('req','الطلبات', I.inbox, openReq)}
+      ${circ('task','مهمة', I.task, tzLeft())}
+      ${circ('tz','تزكية', I.sprout)}
+      ${circ('inv','ورشة', I.board)}
+      ${HIDE_REQ ? circ('learn','تعلم', I.book) : circ('req','الطلبات', I.inbox, openReq)}
     </div>`;
 }
 
@@ -613,6 +645,125 @@ function viewMine(){
 }
 
 
+/* ---------- تزكية + مهمة: الفرائض والنوافل اليومية، بلا درجات ---------- */
+I.task = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6h10M10 12h10M10 18h10"/><path d="M3.5 6l1.5 1.5L7.5 5M3.5 12l1.5 1.5 2.5-2.5M3.5 18l1.5 1.5 2.5-2.5"/></svg>';
+I.sprout = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-9"/><path d="M12 12c0-4.4 3.1-7.5 8-7.5 0 4.4-3.1 7.5-8 7.5z"/><path d="M12 14.5c0-3.3-2.6-5.8-7-5.8 0 3.3 2.6 5.8 7 5.8z"/></svg>';
+const FARD = [['fajr','الفجر'],['dhuhr','الظهر'],['asr','العصر'],['maghrib','المغرب'],['isha','العشاء']];
+const gdF = new Intl.DateTimeFormat('ar-u-nu-latn',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+const hDayF = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura',{day:'numeric'});
+const hInfo = iso => omanH(iso) || {d: +hDayF.format(new Date(isoAdd(iso, S.hAdj ?? 0)+'T12:00:00')), len:null};
+// day N of the Hijri month → juz N; on the 29th of a 29-day month also juz 30
+const juzOf = iso => { const h = hInfo(iso); return h.d===29 && h.len===29 ? [29,30] : [Math.min(h.d,30)]; };
+const tzJ = () => { const J = myJ(); J.tz ||= {}; J.fast ||= {start:'2026-10-19', n:40};
+  if(!J.tzInit){ J.tzInit = 1; (J.tz['2026-10-19'] ||= {}).fast = {t:''}; } return J; };
+const tzGet = d => tzJ().tz[d] || {};
+// old «رحلتي» prayer marks (J.pr) count as done, without a time
+const tzOld = (d,k) => { const J = myJ(); return !!(J.pr && J.pr[d] && J.pr[d][k]); };
+const tzDone = (d,k) => { const r = tzGet(d)[k]; return k==='qiyam' ? !!(r && r.e) || tzOld(d,'qiyam') : !!r || tzOld(d,k); };
+// a night prayer begun before midnight is still open on the next day
+function tzSpan(d,k){ const r = tzGet(d)[k]; if(r) return [d,r]; const y = isoAdd(d,-1), ry = tzGet(y)[k];
+  return ry && ry.s && !ry.e ? [y,ry] : [d, tzOld(d,k) ? {old:1} : null]; }
+const tm = iso => iso ? tfmt.format(new Date(iso)) : '';
+const mins = iso => { const x = new Date(iso); return x.getHours()*60 + x.getMinutes(); };
+const fmtMin = m => tfmt.format(new Date(2000,0,1,Math.floor(m/60),Math.round(m%60)));
+function fastInfo(d){
+  const J = tzJ(), F = J.fast, day = isoDiff(d, F.start) + 1, end = isoAdd(F.start, F.n-1);
+  const done = Object.entries(J.tz).filter(([x,o]) => o.fast && x>=F.start && x<=end).length;
+  return {day, n:F.n, done, start:F.start, end, active: day>=1 && day<=F.n};
+}
+// today's tasks in the order the day runs
+function tzItems(d){
+  const j = juzOf(d), h = hInfo(d), fi = fastInfo(d);
+  const juzSub = 'بحسب اليوم '+h.d+' من الشهر الهجري'+(j.length>1 ? '، والشهر 29 يومًا' : h.d===29 && h.len==null ? '، وإن كان الشهر 29 يومًا فمعه الجزء 30' : '');
+  const it = [
+    {k:'qiyam', n:'قيام الليل', s:'ركعتان', span:1, g:'nf'},
+    {k:'fajr', n:'صلاة الفجر', g:'fr'},
+    {k:'juz', n:j.length>1 ? 'الجزآن 29 و30' : 'الجزء '+j[0], s:juzSub, g:'nf', early:1},
+    {k:'baq', n:'سورة البقرة', s:'كلما كان أبكر كان أحسن', g:'nf', early:1},
+    {k:'dhuhr', n:'صلاة الظهر', g:'fr'},
+    {k:'asr', n:'صلاة العصر', g:'fr'},
+  ];
+  if(fi.active) it.push({k:'fast', n:'صيام اليوم '+fi.day+' من '+fi.n, s:'من طلوع الفجر إلى الليل، اضغط عند الفطر', g:'nf'});
+  it.push({k:'maghrib', n:'صلاة المغرب', g:'fr'}, {k:'isha', n:'صلاة العشاء', g:'fr'});
+  return it;
+}
+// the action control for one task: «بسم الله» / «الحمد لله», or its recorded time
+function tzCtl(d, x){
+  if(x.span){
+    const [sd, r] = tzSpan(d, x.k);
+    if(!r) return `<button class="tzbtn go" data-act="tzgo" data-v="${x.k}" data-op="s">بسم الله</button>`;
+    if(r.s && !r.e) return `<button class="tzbtn" data-act="tzgo" data-v="${x.k}" data-op="e" data-d="${sd}">الحمد لله</button>`;
+    return `<button class="tzdone" data-act="tzundo" data-v="${x.k}" data-d="${sd}">${I.check}</button>`;
+  }
+  return tzDone(d, x.k) ? `<button class="tzdone" data-act="tzundo" data-v="${x.k}" data-d="${d}">${I.check}</button>`
+    : `<button class="tzbtn" data-act="tzgo" data-v="${x.k}" data-op="t">الحمد لله</button>`;
+}
+// the line under a task: its recorded time(s), or the hint
+function tzSub(d, x){
+  if(x.span){ const [, r] = tzSpan(d, x.k);
+    if(r && r.s && r.e) return 'من '+tm(r.s)+' إلى '+tm(r.e)+' · '+Math.max(1, Math.round((new Date(r.e)-new Date(r.s))/6e4))+' دقيقة';
+    if(r && r.s) return 'بدأ '+tm(r.s);
+    if(r && r.old) return 'أُدّي';
+    return x.s || ''; }
+  const r = tzGet(d)[x.k];
+  if(r && r.t) return 'أُدّي '+tm(r.t)+(x.s && x.k==='juz' ? ' · '+x.s : '');
+  if(r || tzOld(d, x.k)) return 'أُدّي';
+  return x.s || '';
+}
+const tzDoneItem = (d, x) => x.span ? (([,r]) => !!(r && (r.e || r.old)))(tzSpan(d, x.k)) : tzDone(d, x.k);
+const tzLeft = () => { const d = ldate(); return tzItems(d).filter(x => !tzDoneItem(d, x)).length; };
+const tzRow = (d, x, next) => `<div class="tzrow ${tzDoneItem(d,x)?'done':''} ${next?'next':''}">
+  <div class="grow"><b>${esc(x.n)}${next?'<span class="tznext">التالي</span>':''}</b><small>${esc(tzSub(d,x))}</small></div>${tzCtl(d,x)}</div>`;
+function tzHead(d){
+  return `<div class="tzhead"><div class="hj">${hijriOf(d)}</div><div class="gd">${gdF.format(new Date(d+'T12:00:00'))}</div>
+    <div class="vs">﴿ قَدۡ أَفۡلَحَ مَن زَكَّىٰهَا ﴾</div></div>`;
+}
+function fastDots(d){
+  const fi = fastInfo(d); if(fi.day < 1 || fi.day > fi.n + 7) return '';
+  const dots = Array.from({length:fi.n}, (_,i) => { const x = isoAdd(fi.start, i);
+    return `<i class="${tzGet(x).fast?'on':x<d?'miss':x===d?'tod':''}"></i>`; }).join('');
+  return `<button class="dpdots" data-act="tzfast" aria-label="تعديل برنامج الصيام">${dots}</button>
+    <p class="small muted" style="margin:6px 0 2px">صُمتَ ${fi.done} من ${fi.n} يومًا · من ${fd(fi.start)} إلى ${fd(fi.end)}</p>`;
+}
+function tzStreak(test){ let d = ldate(), n = 0; if(!test(d)) d = isoAdd(d,-1); while(n<1000 && test(d)){ n++; d = isoAdd(d,-1); } return n; }
+// average clock time (and qiyam length) over the last 7 days
+function tzAvg(k){
+  const xs = []; for(let i=0;i<7;i++){ const r = tzGet(isoAdd(ldate(),-i))[k]; if(r) xs.push(r); }
+  if(k==='qiyam'){ const ok = xs.filter(r => r.s && r.e); if(!ok.length) return '';
+    const s = ok.reduce((a,r)=>a+mins(r.s),0)/ok.length, len = ok.reduce((a,r)=>a+(new Date(r.e)-new Date(r.s))/6e4,0)/ok.length;
+    return 'متوسط البدء هذا الأسبوع '+fmtMin(s)+' · المدة '+Math.round(len)+' دقيقة'; }
+  const ok = xs.filter(r => r.t); if(!ok.length) return '';
+  return 'متوسط الإنجاز هذا الأسبوع '+fmtMin(ok.reduce((a,r)=>a+mins(r.t),0)/ok.length);
+}
+function viewTazkiya(){
+  const d = ldate(), items = tzItems(d), fi = fastInfo(d);
+  const nf = items.filter(x => x.g==='nf' && x.k!=='fast');
+  const pr = FARD.map(([k,n]) => { const on = tzDone(d,k), r = tzGet(d)[k];
+    return `<button class="tzp ${on?'done':''}" data-act="${on?'tzundo':'tzgo'}" data-v="${k}" data-op="t" data-d="${d}"><b>${n}</b><span>${on ? (r && r.t ? tm(r.t) : 'أُدّيت') : 'الحمد لله'}</span></button>`; }).join('');
+  const st = (n, label, sub) => `<div class="tzrow"><span class="tzn">${n}</span><div class="grow"><b>${label}</b>${sub?`<small>${sub}</small>`:''}</div></div>`;
+  const others = JSECS.filter(s => s.k!=='salah').map(s => { const c = jCount(s.k); return `<button class="jcard" data-act="gojsec" data-v="${s.k}">
+      <b>${s.n}</b><span class="jday">${c.day}</span><span class="jsub">اليوم · المجموع ${c.all}</span></button>`; }).join('');
+  return `${tzHead(d)}
+    ${fi.active || fastDots(d) ? `<h2 class="tzsec">الصيام</h2><div class="tzcard">${fi.active ? tzRow(d, items.find(x=>x.k==='fast')) : ''}${fastDots(d)}</div>` : ''}
+    <h2 class="tzsec">النوافل · النماء</h2><div class="tzcard">${nf.map(x => tzRow(d,x)).join('')}</div>
+    <h2 class="tzsec">الفرائض · الأساس</h2><div class="tzpr">${pr}</div>
+    <h2 class="tzsec">الثبات</h2><div class="tzcard">
+      ${st(tzStreak(x => tzDone(x,'qiyam')), 'قيام الليل', tzAvg('qiyam'))}
+      ${st(tzStreak(x => !!tzGet(x).juz), 'جزء اليوم', tzAvg('juz'))}
+      ${st(tzStreak(x => !!tzGet(x).baq), 'سورة البقرة', tzAvg('baq'))}
+      ${st(tzStreak(x => FARD.every(([k]) => tzDone(x,k))), 'الصلوات الخمس', '')}
+      <p class="small muted" style="margin:2px 0 10px">الرقم: عدد الأيام المتتالية التي حافظتَ فيها على العمل. «أحبّ الأعمال إلى الله أدومها وإن قلّ».</p></div>
+    <h2 class="tzsec">أعمال أخرى</h2><div class="jgrid">${others}</div>`;
+}
+function viewTasks(){
+  const d = ldate(), items = tzItems(d), done = items.filter(x => tzDoneItem(d,x)).length;
+  const next = items.find(x => !tzDoneItem(d,x));
+  return `<h1 style="margin-bottom:2px">مهمة</h1><p class="small muted" style="margin:0">مهامّ اليوم · ${hijriOf(d)}</p>
+    <div class="tzprog" role="progressbar" aria-valuenow="${done}" aria-valuemax="${items.length}"><i style="width:${Math.round(done/items.length*100)}%"></i></div>
+    <p class="small" style="margin:-6px 0 12px"><b>${done}</b> من ${items.length} ${done===items.length?'· الحمد لله، أتممتَ مهامّ اليوم':''}</p>
+    <div class="tzcard">${items.map(x => tzRow(d, x, x===next)).join('')}</div>`;
+}
+
 /* ---------- التعلم: personal learning library ---------- */
 const HIDE_REQ = true; // internal requests hidden for now; learning takes their place
 const LDEF = [['book','قراءة كتاب','اسم الكتاب'],['expo','زيارة معرض','اسم المعرض'],['meet','مقابلة شخص','اسم الشخص'],['other','أمور أخرى','العنوان']];
@@ -686,6 +837,8 @@ function render(){
   if(UI.tab==='notif') body = viewNotifs();
   else if(UI.tab==='home') body = viewLanding();
   else if(UI.tab==='cust') body = UI.cust ? viewCustomer() : (!HIDE_CUST_STAGES && (UI.stageF || UI.incF)) ? viewCustomers() : HIDE_CUST_STAGES ? viewMine() : viewHome();
+  else if(UI.tab==='task') body = viewTasks();
+  else if(UI.tab==='tz') body = UI.jsec ? viewMine() : viewTazkiya();
   else if(UI.tab==='inv') body = viewWorkshops();
   else if(UI.tab==='req') body = UI.req ? viewRequest() : viewRequests();
   else if(UI.tab==='learn') body = viewLearn();
@@ -698,7 +851,7 @@ function render(){
           </header>
     <main>${body}</main>`;
   const inc = openReqs().length;
-  const tabs = [['home','الرئيسية',I.home,0],['cust','رحلتي',I.route,0],['inv','ورشة عمل',I.board,0],HIDE_REQ ? ['learn','التعلم',I.book,0] : ['req','الطلبات',I.inbox,inc]];
+  const tabs = [['task','مهمة',I.task,tzLeft()],['tz','تزكية',I.sprout,0],['inv','ورشة',I.board,0],HIDE_REQ ? ['learn','تعلم',I.book,0] : ['req','الطلبات',I.inbox,inc]];
   $('#tabs').innerHTML = tabs.map(([k,l,ic,b]) => `<button data-act="tab" data-v="${k}" ${UI.tab===k?'aria-current="page"':''}>${ic}<span>${l}</span>${b?`<span class="badge">${b}</span>`:''}</button>`).join('');
 }
 
@@ -1561,11 +1714,11 @@ document.addEventListener('click', e => {
   if(NAVS.includes(a)){ if(a==='tab' && UI.tab===v && !UI.cust && !UI.req && !UI.stageF && !UI.incF && !UI.reqStage && !UI.invSec && !UI.prod && !UI.jsec && !UI.lc) return; pushNav(); }
   if(a==='goback'){ goBack(); return; }
   if(a.startsWith('ws_')){ wsAct(a, v, el); return; }
-  if(a==='tab' || a==='open'){ UI.tab=v; UI.cust=null; UI.req=null; UI.reqStage=null; if(v==='cust'){ UI.stageF=''; UI.incF=false; UI.cityF=''; UI.q=''; UI.jsec=null; UI.jsub=null; } if(v==='inv'){ UI.invSec=null; UI.prod=null; UI.wsid=null; } if(v==='learn'){ UI.lc=null; UI.li=null; UI.lq=''; } }
+  if(a==='tab' || a==='open'){ UI.tab=v; UI.cust=null; UI.req=null; UI.reqStage=null; if(v==='cust' || v==='tz'){ UI.stageF=''; UI.incF=false; UI.cityF=''; UI.q=''; UI.jsec=null; UI.jsub=null; } if(v==='inv'){ UI.invSec=null; UI.prod=null; UI.wsid=null; } if(v==='learn'){ UI.lc=null; UI.li=null; UI.lq=''; } }
   else if(a==='golc'){ UI.tab='learn'; UI.lc=v; UI.li=null; UI.liq=''; }
   else if(a==='goli'){ UI.tab='learn'; UI.li=v; }
-  else if(a==='gojsec'){ UI.tab='cust'; UI.cust=null; UI.jsec=v; UI.jsub=null; }
-  else if(a==='gojsub'){ UI.tab='cust'; UI.jsub=v; }
+  else if(a==='gojsec'){ UI.tab='tz'; UI.cust=null; UI.jsec=v; UI.jsub=null; }
+  else if(a==='gojsub'){ UI.tab='tz'; UI.jsub=v; }
   else if(a==='goinvsec'){ UI.tab='inv'; UI.prod=null; UI.invSec=v; }
   else if(a==='openprod'){ UI.tab='inv'; UI.prod=v; }
   else if(a==='goreqstage'){ UI.tab='req'; UI.req=null; UI.reqStage=v; }
@@ -1645,6 +1798,31 @@ document.addEventListener('click', e => {
   else if(a==='praym'){
     const P = prDay(); if(!P[v]){ P[v]=el.dataset.m; }
     closeSheet(); save(); render(); toast('سُجّلت الصلاة: '+(el.dataset.m==='j'?'جماعة، 5 درجات':'فرادى، درجة واحدة')); return;
+  }
+  else if(a==='tzgo'){
+    const J = tzJ(), d = ldate(), now = new Date().toISOString(), op = el.dataset.op;
+    if(op==='e'){ const r = (J.tz[el.dataset.d]||{})[v]; if(r) r.e = now; toast('الحمد لله، تقبّل الله منك'); }
+    else { (J.tz[d] ||= {})[v] = op==='s' ? {s:now} : {t:now}; toast(op==='s' ? 'بسم الله، أعانك الله' : 'الحمد لله، تقبّل الله منك'); }
+    save(); render(); return;
+  }
+  else if(a==='tzundo'){
+    const x = tzItems(ldate()).find(y => y.k===v) || {n:(FARD.find(y=>y[0]===v)||[,''])[1]};
+    infoSheet('إلغاء التسجيل', `<p style="margin-top:0">هل تريد إلغاء تسجيل «${esc(x.n)}»؟</p>
+      <button class="btn bad block" data-act="tzundoyes" data-v="${v}" data-d="${el.dataset.d||ldate()}">إلغاء التسجيل</button>`);
+    return;
+  }
+  else if(a==='tzundoyes'){
+    const J = tzJ(), d = el.dataset.d;
+    if(J.tz[d]) delete J.tz[d][v];
+    if(J.pr && J.pr[d]) delete J.pr[d][v];
+    closeSheet(); save(); render(); toast('أُلغي التسجيل'); return;
+  }
+  else if(a==='tzfast'){
+    const F = tzJ().fast;
+    sheet('برنامج الصيام', `<label class="field"><span>تاريخ أول يوم</span><input type="date" name="s" required value="${esc(F.start)}"></label>
+      <label class="field"><span>عدد الأيام</span><input type="number" name="n" min="1" max="365" required value="${F.n}"></label>`, d => {
+      F.start = d.s; F.n = Math.max(1, Math.min(365, +normDigits(String(d.n))||40)); toast('حُفظ برنامج الصيام'); });
+    return;
   }
   else if(a==='jdone'){
     const sec=v, sub=el.dataset.sub===''?null:+el.dataset.sub;
