@@ -648,6 +648,7 @@ function viewMine(){
 /* ---------- تزكية + مهمة: الفرائض والنوافل اليومية، بلا درجات ---------- */
 I.task = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6h10M10 12h10M10 18h10"/><path d="M3.5 6l1.5 1.5L7.5 5M3.5 12l1.5 1.5 2.5-2.5M3.5 18l1.5 1.5 2.5-2.5"/></svg>';
 I.sprout = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-9"/><path d="M12 12c0-4.4 3.1-7.5 8-7.5 0 4.4-3.1 7.5-8 7.5z"/><path d="M12 14.5c0-3.3-2.6-5.8-7-5.8 0 3.3 2.6 5.8 7 5.8z"/></svg>';
+const QIYAM_WIN = [2*60, 4*60+50]; // وقت قيام الليل: من 2:00 إلى 4:50 صباحًا (بالدقائق من منتصف الليل)
 const FARD = [['fajr','الفجر'],['dhuhr','الظهر'],['asr','العصر'],['maghrib','المغرب'],['isha','العشاء']];
 const gdF = new Intl.DateTimeFormat('ar-u-nu-latn',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 const hDayF = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura',{day:'numeric'});
@@ -676,7 +677,7 @@ function tzItems(d){
   const j = juzOf(d), h = hInfo(d), fi = fastInfo(d);
   const juzSub = 'بحسب اليوم '+h.d+' من الشهر الهجري'+(j.length>1 ? '، والشهر 29 يومًا' : h.d===29 && h.len==null ? '، وإن كان الشهر 29 يومًا فمعه الجزء 30' : '');
   const it = [
-    {k:'qiyam', n:'قيام الليل', s:'ركعتان', span:1, g:'nf'},
+    {k:'qiyam', n:'قيام الليل', s:'ركعتان · من '+fmtMin(QIYAM_WIN[0])+' إلى '+fmtMin(QIYAM_WIN[1]), span:1, g:'nf'},
     {k:'fajr', n:'صلاة الفجر', g:'fr'},
     {k:'juz', n:j.length>1 ? 'الجزآن 29 و30' : 'الجزء '+j[0], s:juzSub, g:'nf', early:1},
     {k:'baq', n:'سورة البقرة', s:'كلما كان أبكر كان أحسن', g:'nf', early:1},
@@ -706,6 +707,7 @@ function tzSub(d, x){
     if(r && r.old) return 'أُدّي';
     return x.s || ''; }
   const r = tzGet(d)[x.k];
+  if(x.g==='fr') return r || tzOld(d, x.k) ? 'أُدّيت' : ''; // الصلوات: تثبيت الأداء فقط، بلا وقت
   if(r && r.t) return 'أُدّي '+tm(r.t)+(x.s && x.k==='juz' ? ' · '+x.s : '');
   if(r || tzOld(d, x.k)) return 'أُدّي';
   return x.s || '';
@@ -739,7 +741,7 @@ function viewTazkiya(){
   const d = ldate(), items = tzItems(d), fi = fastInfo(d);
   const nf = items.filter(x => x.g==='nf' && x.k!=='fast');
   const pr = FARD.map(([k,n]) => { const on = tzDone(d,k), r = tzGet(d)[k];
-    return `<button class="tzp ${on?'done':''}" data-act="${on?'tzundo':'tzgo'}" data-v="${k}" data-op="t" data-d="${d}"><b>${n}</b><span>${on ? (r && r.t ? tm(r.t) : 'أُدّيت') : 'الحمد لله'}</span></button>`; }).join('');
+    return `<button class="tzp ${on?'done':''}" data-act="${on?'tzundo':'tzgo'}" data-v="${k}" data-op="t" data-d="${d}"><b>${n}</b><span>${on ? 'أُدّيت' : 'الحمد لله'}</span></button>`; }).join('');
   const st = (n, label, sub) => `<div class="tzrow"><span class="tzn">${n}</span><div class="grow"><b>${label}</b>${sub?`<small>${sub}</small>`:''}</div></div>`;
   const others = JSECS.filter(s => s.k!=='salah').map(s => { const c = jCount(s.k); return `<button class="jcard" data-act="gojsec" data-v="${s.k}">
       <b>${s.n}</b><span class="jday">${c.day}</span><span class="jsub">اليوم · المجموع ${c.all}</span></button>`; }).join('');
